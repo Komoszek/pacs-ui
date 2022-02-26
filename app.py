@@ -89,9 +89,10 @@ class NewSinkDialog(Gtk.Dialog):
         self.show_all()
 
     def refresh_sink_list(self):
+        tempListStore = Gtk.ListStore(str, str, str);
         self.sinks_liststore.clear()
         for sink in self.SinkList():
-            self.sinks_liststore.append([False, sink[1], sink[0]])
+            self.sinks_liststore.append([sink[0] in self.name_set, sink[1], sink[0]])
 
     def on_cell_toggled(self, widget, path):
         self.sinks_liststore[path][0] = not self.sinks_liststore[path][0]
@@ -119,7 +120,8 @@ class NewSinkDialog(Gtk.Dialog):
 
     def update_button_state(self):
         sink_name = self.name_entry.get_text()
-        if len(self.name_set) < 1 or sink_name in self.name_set or not sink_name or not self.description_entry.get_text():
+        match = re.search(r"^[\w.,-]+$", sink_name)
+        if len(self.name_set) < 1 or match == None or sink_name in self.name_set or not sink_name or not self.description_entry.get_text():
             self.buttonOK.set_sensitive(False)
         else:
             self.buttonOK.set_sensitive(True)
@@ -185,9 +187,6 @@ class TreeViewFilterWindow(Gtk.Window):
 
     def _build_context_menu(self):
         self.cmenu = Gtk.Menu.new()
-
-        self.edit_sink_item = Gtk.MenuItem.new_with_label('Edit')
-        self.cmenu.append(self.edit_sink_item)
 
         self.remove_sink_item = Gtk.MenuItem.new_with_label('Remove')
         self.cmenu.append(self.remove_sink_item)
